@@ -28,8 +28,8 @@ Make sure you have the following installed:
 After cloning the repository:
 
 ```bash
-git clone <your-repo-url>
-cd <project-folder>
+git clone git@github.com:FerasaSoftwares/TailAdmin-laravel-Docker.git
+cd TailAdmin-laravel-Docker
 ```
 
 Run the setup script:
