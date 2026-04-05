@@ -24,13 +24,26 @@ if [ "$confirm" = "y" ]; then
 
   echo "🔧 Updating .env..."
 
-  sed -i.bak "s/^DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/" .env
-  sed -i.bak "s/^DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" .env
-  sed -i.bak "s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env
+  sed -i.bak "s|^DB_DATABASE=.*|DB_DATABASE=$DB_DATABASE|" .env
+  sed -i.bak "s|^DB_USERNAME=.*|DB_USERNAME=$DB_USERNAME|" .env
+  sed -i.bak "s|^DB_PASSWORD=.*|DB_PASSWORD=\"$DB_PASSWORD\"|" .env
 
   echo "⚠️ Resetting database (required for new credentials)..."
   docker-compose down -v
 fi
+
+# 🔥 IMPORTANT FIX: Load .env into shell for docker-compose
+echo ""
+echo "📄 Loading environment variables..."
+
+set -o allexport
+source .env
+set +o allexport
+
+# Debug (optional)
+echo "🔍 DB Config:"
+echo "DB_DATABASE=$DB_DATABASE"
+echo "DB_USERNAME=$DB_USERNAME"
 
 # Step 3: Start Docker
 docker-compose up -d --build
@@ -40,6 +53,12 @@ echo ""
 echo "⏳ Waiting for MySQL to be ready..."
 
 DB_CONTAINER=$(docker ps -a --filter "name=db" --format "{{.Names}}" | head -n 1)
+
+if [ -z "$DB_CONTAINER" ]; then
+  echo "❌ DB container not found!"
+  docker-compose logs db
+  exit 1
+fi
 
 while true; do
   STATUS=$(docker inspect --format='{{.State.Health.Status}}' $DB_CONTAINER 2>/dev/null || echo "starting")
