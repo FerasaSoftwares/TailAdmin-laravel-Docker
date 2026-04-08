@@ -151,6 +151,18 @@ docker-compose down -v
 
 ---
 
+### Reset Whole Project (important)
+
+```bash
+docker-compose down -v --remove-orphans
+rm -rf vendor
+rm -rf node_modules
+rm -rf public/build
+rm .env
+```
+
+---
+
 ## 🎨 Frontend (Vite)
 
 ### Development mode (hot reload)
